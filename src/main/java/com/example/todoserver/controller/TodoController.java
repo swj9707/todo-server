@@ -51,32 +51,39 @@ public class TodoController {
         }
     }
     
-    @GetMapping
+    @PostMapping("/retrieve")
     public ResponseEntity<?> retrieveTodoList(){
-        String tmporaryUserId = "temporary-user";
+        try{
+            String tmporaryUserId = "temporary-user";
 
-        List<TodoEntity> entities = todoService.retrieve(tmporaryUserId);
-        List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
+            List<TodoEntity> entities = todoService.retrieve(tmporaryUserId);
+            List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
         
-        ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().data(dtos).build();
+            ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().data(dtos).build();
 
         return ResponseEntity.ok().body(response);
+        } catch(Exception e){
+            String error = e.getMessage();
+            ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().error(error).build();
+            return ResponseEntity.badRequest().body(response);
+
+        }
     }
 
     @PutMapping
-    public ResponseEntity<?> updateTodo(@RequestBody TodoDTO dto){
-        String tmporaryUserId = "temporary-user";
+  public ResponseEntity<?> updateTodo(@RequestBody TodoDTO dto) {
+    String temporaryUserId = "temporary-user";
 
-        TodoEntity entity = TodoDTO.dtoToEntity(dto);
-        entity.setUserId(tmporaryUserId);
-        
-        List<TodoEntity> entities = todoService.update(entity);
-        List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
-       
-        ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().data(dtos).build();
-        
-        return ResponseEntity.ok().body(response);
-    }
+    TodoEntity entity = TodoDTO.dtoToEntity(dto);
+
+    entity.setUserId(temporaryUserId);
+
+    List<TodoEntity> entities = todoService.update(entity);
+    List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
+    ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().data(dtos).build();
+
+    return ResponseEntity.ok().body(response);
+  }
 
     @DeleteMapping
     public ResponseEntity<?> deleteTodo(@RequestBody TodoDTO dto){

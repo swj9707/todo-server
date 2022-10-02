@@ -40,24 +40,27 @@ public class TodoService {
         return todoRepository.findByUserId(userId);
     }
 
-    public List<TodoEntity> update(final TodoEntity entity){
+    public List<TodoEntity> update(final TodoEntity entity) {
         validate(entity);
+    
         final Optional<TodoEntity> original = todoRepository.findById(entity.getId());
-
+    
         original.ifPresent(todo -> {
-            todo.setTitle(entity.getTitle());
-            todo.setDone(entity.isDone());
-            todoRepository.save(todo);
+          todo.setTitle(entity.getTitle());
+          todo.setDone(entity.isDone());
+    
+          todoRepository.save(todo);
         });
-
-        return retrieve(entity.getId());
-    }
+.
+        return retrieve(entity.getUserId());
+      }
 
     public List<TodoEntity> delete(final TodoEntity entity){
         validate(entity);
 
         try{
             todoRepository.delete(entity);
+            log.info("Entity Id : {} is Deleted.", entity.getId());
         } catch (Exception e){
             log.error("Error deleting Entity ", entity.getId(), e);
             throw new RuntimeException("Error deleting Entity " +entity.getId());

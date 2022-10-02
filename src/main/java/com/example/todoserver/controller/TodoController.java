@@ -5,8 +5,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,43 +26,41 @@ public class TodoController {
     private TodoService todoService;
 
     @PostMapping
-    public ResponseEntity<?> createTodo(@RequestBody TodoDTO dto){
+    public ResponseEntity<?> createTodo(@AuthenticationPrincipal String userId, @RequestBody TodoDTO dto) {
         try {
 
-            String temporaryUserId = "temporary-user";
             TodoEntity entity = TodoDTO.dtoToEntity(dto);
-            
+
             entity.setId(null);
-            entity.setUserId(temporaryUserId);
-            
+            entity.setUserId(userId);
+
             List<TodoEntity> entities = todoService.create(entity);
             List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
-            
+
             ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().data(dtos).build();
 
             return ResponseEntity.ok().body(response);
 
-        } catch (Exception e){
+        } catch (Exception e) {
             String error = e.getMessage();
             ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().error(error).build();
-            
+
             return ResponseEntity.badRequest().body(response);
 
         }
     }
-    
-    @PostMapping("/retrieve")
-    public ResponseEntity<?> retrieveTodoList(){
-        try{
-            String tmporaryUserId = "temporary-user";
 
-            List<TodoEntity> entities = todoService.retrieve(tmporaryUserId);
+    @PostMapping("/retrieve")
+    public ResponseEntity<?> retrieveTodoList(@AuthenticationPrincipal String userId) {
+        try {
+
+            List<TodoEntity> entities = todoService.retrieve(userId);
             List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
-        
+
             ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().data(dtos).build();
 
-        return ResponseEntity.ok().body(response);
-        } catch(Exception e){
+            return ResponseEntity.ok().body(response);
+        } catch (Exception e) {
             String error = e.getMessage();
             ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().error(error).build();
             return ResponseEntity.badRequest().body(response);
@@ -71,33 +69,29 @@ public class TodoController {
     }
 
     @PutMapping
-  public ResponseEntity<?> updateTodo(@RequestBody TodoDTO dto) {
-    String temporaryUserId = "temporary-user";
+    public ResponseEntity<?> updateTodo(@AuthenticationPrincipal String userId, @RequestBody TodoDTO dto) {
+        TodoEntity entity = TodoDTO.dtoToEntity(dto);
 
-    TodoEntity entity = TodoDTO.dtoToEntity(dto);
+        entity.setUserId(userId);
 
-    entity.setUserId(temporaryUserId);
+        List<TodoEntity> entities = todoService.update(entity);
+        List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
+        ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().data(dtos).build();
 
-    List<TodoEntity> entities = todoService.update(entity);
-    List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
-    ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().data(dtos).build();
-
-    return ResponseEntity.ok().body(response);
-  }
+        return ResponseEntity.ok().body(response);
+    }
 
     @DeleteMapping
-    public ResponseEntity<?> deleteTodo(@RequestBody TodoDTO dto){
-        try{
-            String tmporaryUserId = "temporary-user";
-
+    public ResponseEntity<?> deleteTodo(@AuthenticationPrincipal String userId, @RequestBody TodoDTO dto) {
+        try {
             TodoEntity entity = TodoDTO.dtoToEntity(dto);
-            entity.setUserId(tmporaryUserId);
+            entity.setUserId(userId);
             List<TodoEntity> entities = todoService.delete(entity);
             List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
             ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().data(dtos).build();
 
             return ResponseEntity.ok().body(response);
-        } catch (Exception e){
+        } catch (Exception e) {
             String error = e.getMessage();
             ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().error(error).build();
             return ResponseEntity.badRequest().body(response);

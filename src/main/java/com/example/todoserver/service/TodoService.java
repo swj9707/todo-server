@@ -51,20 +51,20 @@ public class TodoService {
     
           todoRepository.save(todo);
         });
-.
+
         return retrieve(entity.getUserId());
       }
 
-    public List<TodoEntity> delete(final TodoEntity entity){
-        validate(entity);
+    public List<TodoEntity> delete(final TodoEntity entity) {
+    validate(entity);
 
-        try{
-            todoRepository.delete(entity);
-            log.info("Entity Id : {} is Deleted.", entity.getId());
-        } catch (Exception e){
-            log.error("Error deleting Entity ", entity.getId(), e);
-            throw new RuntimeException("Error deleting Entity " +entity.getId());
-        }
-        return retrieve(entity.getId());
+    try {
+      todoRepository.delete(entity);
+    } catch(Exception e) {
+      log.error("error deleting entity ", entity.getId(), e);
+      throw new RuntimeException("error deleting entity " + entity.getId());
     }
+    log.info("Entity Id : {} is deleted.", entity.getId());
+    return retrieve(entity.getUserId());
+  }
 }
